@@ -8,8 +8,7 @@
         "backend": {
             "root": "backend",
             "framework": "flask",
-            "entrypoint": "app.py",
-            "routePrefix": "/api"
+            "entrypoint": "app.py"
         }
     }
 }

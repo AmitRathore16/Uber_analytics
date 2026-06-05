@@ -70,13 +70,6 @@ def get_db_connection():
         database=DATABASE_NAME,
         use_pure=True
     )
-@app.route("/")
-def home():
-    return {"status": "backend running"}
-
-@app.route("/sql-questions")
-def test():
-    return {"test": "working"}
 # Predefined 15 advanced SQL questions
 SQL_QUESTIONS = [
     {
@@ -188,7 +181,7 @@ def fetch_all_to_dict(cursor):
         results.append(row_dict)
     return results
 
-@app.route('/api/metrics', methods=['GET'])
+@app.route('/metrics', methods=['GET'])
 def get_metrics():
     vehicle_type = request.args.get('vehicle_type', None)
     
@@ -342,7 +335,7 @@ def get_metrics():
         cursor.close()
         conn.close()
 
-@app.route('/api/sql-questions', methods=['GET'])
+@app.route('/sql-questions', methods=['GET'])
 def get_sql_questions():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -422,7 +415,7 @@ Expected JSON Output Schema:
 }
 """
 
-@app.route('/api/chat', methods=['POST'])
+@app.route('/chat', methods=['POST'])
 def chat():
     data = request.json or {}
     message = data.get('message', '')

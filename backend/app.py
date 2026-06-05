@@ -70,7 +70,13 @@ def get_db_connection():
         database=DATABASE_NAME,
         use_pure=True
     )
+@app.route("/")
+def home():
+    return {"status": "backend running"}
 
+@app.route("/sql-questions")
+def test():
+    return {"test": "working"}
 # Predefined 15 advanced SQL questions
 SQL_QUESTIONS = [
     {

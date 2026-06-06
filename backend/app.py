@@ -96,12 +96,12 @@ SQL_QUESTIONS = [
         "query": "SELECT `Customer ID`, COUNT(*) AS `Total Rides`, SUM(CASE WHEN `Booking Status` = 'Completed' THEN 1 ELSE 0 END) AS `Completed Rides`, SUM(`Booking Value`) AS `Total Spending`, ROUND(AVG(`Customer Rating`), 2) AS `Avg Rating` FROM uber_rides GROUP BY `Customer ID` HAVING COUNT(*) > 10 ORDER BY `Total Spending` DESC LIMIT 10;",
         "topics": ["GROUP BY", "HAVING", "COUNT", "SUM", "AVG"]
     },
-    {
-        "id": 5,
-        "question": "Determine the top vehicle type by completed bookings for each pickup location using ROW_NUMBER().",
-        "query": "WITH RankedVehicles AS (\n    SELECT `Pickup Location`, `Vehicle Type`, COUNT(*) AS `Completed Rides`,\n    ROW_NUMBER() OVER (PARTITION BY `Pickup Location` ORDER BY COUNT(*) DESC) as rn\n    FROM uber_rides\n    WHERE `Booking Status` = 'Completed'\n    GROUP BY `Pickup Location`, `Vehicle Type`\n)\nSELECT `Pickup Location`, `Vehicle Type`, `Completed Rides`\nFROM RankedVehicles\nWHERE rn = 1\nORDER BY `Completed Rides` DESC\nLIMIT 10;",
-        "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "ROW_NUMBER()", "PARTITION BY", "GROUP BY"]
-    },
+    # {
+    #     "id": 5,
+    #     "question": "Determine the top vehicle type by completed bookings for each pickup location using ROW_NUMBER().",
+    #     "query": "WITH RankedVehicles AS (\n    SELECT `Pickup Location`, `Vehicle Type`, COUNT(*) AS `Completed Rides`,\n    ROW_NUMBER() OVER (PARTITION BY `Pickup Location` ORDER BY COUNT(*) DESC) as rn\n    FROM uber_rides\n    WHERE `Booking Status` = 'Completed'\n    GROUP BY `Pickup Location`, `Vehicle Type`\n)\nSELECT `Pickup Location`, `Vehicle Type`, `Completed Rides`\nFROM RankedVehicles\nWHERE rn = 1\nORDER BY `Completed Rides` DESC\nLIMIT 10;",
+    #     "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "ROW_NUMBER()", "PARTITION BY", "GROUP BY"]
+    # },
     {
         "id": 6,
         "question": "Find the pickup-to-drop location pairs that have the highest number of bookings, along with the average ride distance and total booking value.",
@@ -114,18 +114,18 @@ SQL_QUESTIONS = [
         "query": "SELECT `Driver Cancellation Reason`, COUNT(*) AS `Cancellations`, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM uber_rides WHERE `Booking Status` = 'Cancelled by Driver'), 2) AS `Percentage` FROM uber_rides WHERE `Booking Status` = 'Cancelled by Driver' AND `Driver Cancellation Reason` IS NOT NULL AND `Driver Cancellation Reason` != '' GROUP BY `Driver Cancellation Reason` ORDER BY `Cancellations` DESC;",
         "topics": ["GROUP BY", "CASE WHEN", "COUNT", "Subquery", "Arithmetic Operations"]
     },
-    {
-        "id": 8,
-        "question": "Retrieve the booking details for the longest ride distance for each vehicle type using DENSE_RANK().",
-        "query": "WITH RankedRides AS (\n    SELECT `Booking ID`, `Vehicle Type`, `Ride Distance`, `Booking Value`, `Booking Status`,\n    DENSE_RANK() OVER (PARTITION BY `Vehicle Type` ORDER BY `Ride Distance` DESC) as rk\n    FROM uber_rides\n    WHERE `Ride Distance` IS NOT NULL\n)\nSELECT `Vehicle Type`, `Booking ID`, `Ride Distance`, `Booking Value`, `Booking Status`\nFROM RankedRides\nWHERE rk = 1\nORDER BY `Ride Distance` DESC;",
-        "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "DENSE_RANK()", "PARTITION BY", "ORDER BY"]
-    },
-    {
-        "id": 9,
-        "question": "Calculate the running total of revenue day-by-day for Completed bookings in the month of May 2025.",
-        "query": "SELECT `Date`, SUM(`Booking Value`) AS `Daily Revenue`, ROUND(SUM(SUM(`Booking Value`)) OVER (ORDER BY `Date`), 2) AS `Running Total` FROM uber_rides WHERE `Booking Status` = 'Completed' AND `Date` >= '2025-05-01' AND `Date` <= '2025-05-31' GROUP BY `Date` ORDER BY `Date`;",
-        "topics": ["WINDOW FUNCTION", "SUM() OVER()", "GROUP BY", "DATE Filter", "ORDER BY"]
-    },
+    # {
+    #     "id": 8,
+    #     "question": "Retrieve the booking details for the longest ride distance for each vehicle type using DENSE_RANK().",
+    #     "query": "WITH RankedRides AS (\n    SELECT `Booking ID`, `Vehicle Type`, `Ride Distance`, `Booking Value`, `Booking Status`,\n    DENSE_RANK() OVER (PARTITION BY `Vehicle Type` ORDER BY `Ride Distance` DESC) as rk\n    FROM uber_rides\n    WHERE `Ride Distance` IS NOT NULL\n)\nSELECT `Vehicle Type`, `Booking ID`, `Ride Distance`, `Booking Value`, `Booking Status`\nFROM RankedRides\nWHERE rk = 1\nORDER BY `Ride Distance` DESC;",
+    #     "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "DENSE_RANK()", "PARTITION BY", "ORDER BY"]
+    # },
+    # {
+    #     "id": 9,
+    #     "question": "Calculate the running total of revenue day-by-day for Completed bookings in the month of May 2025.",
+    #     "query": "SELECT `Date`, SUM(`Booking Value`) AS `Daily Revenue`, ROUND(SUM(SUM(`Booking Value`)) OVER (ORDER BY `Date`), 2) AS `Running Total` FROM uber_rides WHERE `Booking Status` = 'Completed' AND `Date` >= '2025-05-01' AND `Date` <= '2025-05-31' GROUP BY `Date` ORDER BY `Date`;",
+    #     "topics": ["WINDOW FUNCTION", "SUM() OVER()", "GROUP BY", "DATE Filter", "ORDER BY"]
+    # },
     {
         "id": 10,
         "question": "Find the average customer rating for each driver rating bucket (1.0-2.0, 2.0-3.0, 3.0-4.0, 4.0-5.0).",
@@ -138,12 +138,12 @@ SQL_QUESTIONS = [
         "query": "SELECT HOUR(`Time`) AS `Hour`, COUNT(*) AS `Total Bookings`, SUM(`Booking Value`) AS `Total Revenue` FROM uber_rides GROUP BY `Hour` ORDER BY `Total Bookings` DESC LIMIT 5;",
         "topics": ["HOUR() Function", "GROUP BY", "ORDER BY", "LIMIT"]
     },
-    {
-        "id": 12,
-        "question": "Calculate the month-over-month revenue growth percentage for completed rides.",
-        "query": "WITH MonthlyRev AS (\n    SELECT DATE_FORMAT(`Date`, '%Y-%m') AS `Month`, SUM(`Booking Value`) AS `Revenue`\n    FROM uber_rides\n    WHERE `Booking Status` = 'Completed'\n    GROUP BY `Month`\n)\nSELECT `Month`, `Revenue`,\nLAG(`Revenue`, 1) OVER (ORDER BY `Month`) AS `Previous Month Revenue`,\nROUND((`Revenue` - LAG(`Revenue`, 1) OVER (ORDER BY `Month`)) * 100.0 / LAG(`Revenue`, 1) OVER (ORDER BY `Month`), 2) AS `Growth Percentage`\nFROM MonthlyRev\nORDER BY `Month`;",
-        "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "LAG()", "Arithmetic Operations", "DATE_FORMAT"]
-    },
+    # {
+    #     "id": 12,
+    #     "question": "Calculate the month-over-month revenue growth percentage for completed rides.",
+    #     "query": "WITH MonthlyRev AS (\n    SELECT DATE_FORMAT(`Date`, '%Y-%m') AS `Month`, SUM(`Booking Value`) AS `Revenue`\n    FROM uber_rides\n    WHERE `Booking Status` = 'Completed'\n    GROUP BY `Month`\n)\nSELECT `Month`, `Revenue`,\nLAG(`Revenue`, 1) OVER (ORDER BY `Month`) AS `Previous Month Revenue`,\nROUND((`Revenue` - LAG(`Revenue`, 1) OVER (ORDER BY `Month`)) * 100.0 / LAG(`Revenue`, 1) OVER (ORDER BY `Month`), 2) AS `Growth Percentage`\nFROM MonthlyRev\nORDER BY `Month`;",
+    #     "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "LAG()", "Arithmetic Operations", "DATE_FORMAT"]
+    # },
     {
         "id": 13,
         "question": "Retrieve the customer IDs who have cancelled rides more than 3 times, along with their average ratings.",

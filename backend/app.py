@@ -301,7 +301,7 @@ Expected JSON Output Schema:
 }
 """
 
-@app.route('/chat', methods=['POST'])
+@app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.json or {}
     message = data.get('message', '')

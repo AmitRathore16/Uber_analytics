@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Database, 
   Bot,
   Send
 } from 'lucide-react';
@@ -15,7 +14,7 @@ function App() {
     { role: 'assistant', content: GREETING_TEXT, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
-  const [openedQueries, setOpenedQueries] = useState({}); // tracking which messages have their query block open
+
 
   const chatEndRef = useRef(null);
 
@@ -80,15 +79,10 @@ function App() {
     setChatHistory([
       { role: 'assistant', content: GREETING_TEXT, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
     ]);
-    setOpenedQueries({});
+
   };
 
-  const toggleQueryBlock = (index) => {
-    setOpenedQueries(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
-  };
+
 
   return (
     <div className="app-container">
@@ -136,55 +130,7 @@ function App() {
                   <div className="message-bubble">
                     {msg.content}
                     
-                    {/* Show query toggle if query exists */}
-                    {msg.query && (
-                      <div className="chat-sql-block">
-                        <button 
-                          className="show-query-btn"
-                          onClick={() => toggleQueryBlock(index)}
-                        >
-                          <Database size={12} />
-                          {openedQueries[index] ? "Hide Query" : "Show Query"}
-                        </button>
-                        
-                        {openedQueries[index] && (
-                          <div className="animate-fade-in">
-                            <pre className="query-viewer-embed">
-                              {msg.query}
-                            </pre>
-                            {msg.query_results && msg.query_results.length > 0 && (
-                              <div className="query-results-table-wrapper">
-                                <table className="query-results-table">
-                                  <thead>
-                                    <tr>
-                                      {Object.keys(msg.query_results[0]).map((col) => (
-                                        <th key={col}>{col}</th>
-                                      ))}
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {msg.query_results.slice(0, 10).map((row, rIdx) => (
-                                      <tr key={rIdx}>
-                                        {Object.values(row).map((val, cIdx) => (
-                                          <td key={cIdx}>
-                                            {typeof val === 'number' ? val.toFixed(2).replace(/\.00$/, '') : String(val)}
-                                          </td>
-                                        ))}
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                                {msg.query_results.length > 10 && (
-                                  <div style={{ fontSize: '9px', color: 'var(--text-secondary)', padding: '4px 8px', textAlign: 'center', background: '#f8fafc' }}>
-                                    Showing top 10 of {msg.query_results.length} rows
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
+
                   </div>
                   <span className="message-meta">{msg.timestamp}</span>
                 </div>

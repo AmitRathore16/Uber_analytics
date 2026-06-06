@@ -70,99 +70,7 @@ def get_db_connection():
         database=DATABASE_NAME,
         use_pure=True
     )
-# Predefined 15 advanced SQL questions
-SQL_QUESTIONS = [
-    {
-        "id": 1,
-        "question": "Retrieve the top 5 pickup locations by total revenue where the average customer rating is greater than 4.0.",
-        "query": "SELECT `Pickup Location`, SUM(`Booking Value`) AS `Total Revenue`, AVG(`Customer Rating`) AS `Avg Customer Rating` FROM uber_rides GROUP BY `Pickup Location` HAVING AVG(`Customer Rating`) > 4.0 ORDER BY `Total Revenue` DESC LIMIT 5;",
-        "topics": ["GROUP BY", "ORDER BY", "HAVING", "Aggregate Functions", "LIMIT"]
-    },
-    {
-        "id": 2,
-        "question": "Find the monthly trend of completed bookings count and total revenue for each month.",
-        "query": "SELECT DATE_FORMAT(`Date`, '%Y-%m') AS `Month`, COUNT(*) AS `Completed Bookings`, SUM(`Booking Value`) AS `Total Revenue` FROM uber_rides WHERE `Booking Status` = 'Completed' GROUP BY `Month` ORDER BY `Month`;",
-        "topics": ["DATE_FORMAT", "GROUP BY", "ORDER BY", "Aggregate Functions"]
-    },
-    {
-        "id": 3,
-        "question": "Calculate the percentage of cancelled rides for each vehicle type.",
-        "query": "SELECT `Vehicle Type`, COUNT(*) AS `Total Bookings`, SUM(CASE WHEN `Booking Status` LIKE 'Cancelled%' OR `Booking Status` = 'No Driver Found' THEN 1 ELSE 0 END) AS `Cancelled Bookings`, ROUND(SUM(CASE WHEN `Booking Status` LIKE 'Cancelled%' OR `Booking Status` = 'No Driver Found' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) AS `Cancellation Percentage` FROM uber_rides GROUP BY `Vehicle Type` ORDER BY `Cancellation Percentage` DESC;",
-        "topics": ["CASE WHEN", "GROUP BY", "Aggregate Functions", "Arithmetic Operations"]
-    },
-    {
-        "id": 4,
-        "question": "Identify the customers who have booked more than 10 rides, along with their total completed rides, total spending, and average rating.",
-        "query": "SELECT `Customer ID`, COUNT(*) AS `Total Rides`, SUM(CASE WHEN `Booking Status` = 'Completed' THEN 1 ELSE 0 END) AS `Completed Rides`, SUM(`Booking Value`) AS `Total Spending`, ROUND(AVG(`Customer Rating`), 2) AS `Avg Rating` FROM uber_rides GROUP BY `Customer ID` HAVING COUNT(*) > 10 ORDER BY `Total Spending` DESC LIMIT 10;",
-        "topics": ["GROUP BY", "HAVING", "COUNT", "SUM", "AVG"]
-    },
-    # {
-    #     "id": 5,
-    #     "question": "Determine the top vehicle type by completed bookings for each pickup location using ROW_NUMBER().",
-    #     "query": "WITH RankedVehicles AS (\n    SELECT `Pickup Location`, `Vehicle Type`, COUNT(*) AS `Completed Rides`,\n    ROW_NUMBER() OVER (PARTITION BY `Pickup Location` ORDER BY COUNT(*) DESC) as rn\n    FROM uber_rides\n    WHERE `Booking Status` = 'Completed'\n    GROUP BY `Pickup Location`, `Vehicle Type`\n)\nSELECT `Pickup Location`, `Vehicle Type`, `Completed Rides`\nFROM RankedVehicles\nWHERE rn = 1\nORDER BY `Completed Rides` DESC\nLIMIT 10;",
-    #     "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "ROW_NUMBER()", "PARTITION BY", "GROUP BY"]
-    # },
-    {
-        "id": 6,
-        "question": "Find the pickup-to-drop location pairs that have the highest number of bookings, along with the average ride distance and total booking value.",
-        "query": "SELECT `Pickup Location`, `Drop Location`, COUNT(*) AS `Total Bookings`, ROUND(AVG(`Ride Distance`), 2) AS `Avg Distance`, SUM(`Booking Value`) AS `Total Revenue` FROM uber_rides GROUP BY `Pickup Location`, `Drop Location` ORDER BY `Total Bookings` DESC LIMIT 5;",
-        "topics": ["GROUP BY", "ORDER BY", "COUNT", "AVG", "SUM"]
-    },
-    {
-        "id": 7,
-        "question": "Find the distribution of cancellation reasons by drivers, listing the reasons and their percentages of total driver cancellations.",
-        "query": "SELECT `Driver Cancellation Reason`, COUNT(*) AS `Cancellations`, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM uber_rides WHERE `Booking Status` = 'Cancelled by Driver'), 2) AS `Percentage` FROM uber_rides WHERE `Booking Status` = 'Cancelled by Driver' AND `Driver Cancellation Reason` IS NOT NULL AND `Driver Cancellation Reason` != '' GROUP BY `Driver Cancellation Reason` ORDER BY `Cancellations` DESC;",
-        "topics": ["GROUP BY", "CASE WHEN", "COUNT", "Subquery", "Arithmetic Operations"]
-    },
-    # {
-    #     "id": 8,
-    #     "question": "Retrieve the booking details for the longest ride distance for each vehicle type using DENSE_RANK().",
-    #     "query": "WITH RankedRides AS (\n    SELECT `Booking ID`, `Vehicle Type`, `Ride Distance`, `Booking Value`, `Booking Status`,\n    DENSE_RANK() OVER (PARTITION BY `Vehicle Type` ORDER BY `Ride Distance` DESC) as rk\n    FROM uber_rides\n    WHERE `Ride Distance` IS NOT NULL\n)\nSELECT `Vehicle Type`, `Booking ID`, `Ride Distance`, `Booking Value`, `Booking Status`\nFROM RankedRides\nWHERE rk = 1\nORDER BY `Ride Distance` DESC;",
-    #     "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "DENSE_RANK()", "PARTITION BY", "ORDER BY"]
-    # },
-    # {
-    #     "id": 9,
-    #     "question": "Calculate the running total of revenue day-by-day for Completed bookings in the month of May 2025.",
-    #     "query": "SELECT `Date`, SUM(`Booking Value`) AS `Daily Revenue`, ROUND(SUM(SUM(`Booking Value`)) OVER (ORDER BY `Date`), 2) AS `Running Total` FROM uber_rides WHERE `Booking Status` = 'Completed' AND `Date` >= '2025-05-01' AND `Date` <= '2025-05-31' GROUP BY `Date` ORDER BY `Date`;",
-    #     "topics": ["WINDOW FUNCTION", "SUM() OVER()", "GROUP BY", "DATE Filter", "ORDER BY"]
-    # },
-    {
-        "id": 10,
-        "question": "Find the average customer rating for each driver rating bucket (1.0-2.0, 2.0-3.0, 3.0-4.0, 4.0-5.0).",
-        "query": "SELECT \n    CASE \n        WHEN `Driver Ratings` >= 1.0 AND `Driver Ratings` < 2.0 THEN '1.0 - 2.0'\n        WHEN `Driver Ratings` >= 2.0 AND `Driver Ratings` < 3.0 THEN '2.0 - 3.0'\n        WHEN `Driver Ratings` >= 3.0 AND `Driver Ratings` < 4.0 THEN '3.0 - 4.0'\n        WHEN `Driver Ratings` >= 4.0 AND `Driver Ratings` <= 5.0 THEN '4.0 - 5.0'\n        ELSE 'Unknown/No Rating'\n    END AS `Driver Rating Bucket`,\n    COUNT(*) AS `Ride Count`,\n    ROUND(AVG(`Customer Rating`), 2) AS `Avg Customer Rating`\nFROM uber_rides\nWHERE `Driver Ratings` IS NOT NULL AND `Customer Rating` IS NOT NULL\nGROUP BY `Driver Rating Bucket`\nORDER BY `Driver Rating Bucket`;",
-        "topics": ["CASE WHEN", "GROUP BY", "ORDER BY", "AVG", "NULL Filters"]
-    },
-    {
-        "id": 11,
-        "question": "Identify the peak hours of the day (hour 0-23) with the highest booking count and revenue.",
-        "query": "SELECT HOUR(`Time`) AS `Hour`, COUNT(*) AS `Total Bookings`, SUM(`Booking Value`) AS `Total Revenue` FROM uber_rides GROUP BY `Hour` ORDER BY `Total Bookings` DESC LIMIT 5;",
-        "topics": ["HOUR() Function", "GROUP BY", "ORDER BY", "LIMIT"]
-    },
-    # {
-    #     "id": 12,
-    #     "question": "Calculate the month-over-month revenue growth percentage for completed rides.",
-    #     "query": "WITH MonthlyRev AS (\n    SELECT DATE_FORMAT(`Date`, '%Y-%m') AS `Month`, SUM(`Booking Value`) AS `Revenue`\n    FROM uber_rides\n    WHERE `Booking Status` = 'Completed'\n    GROUP BY `Month`\n)\nSELECT `Month`, `Revenue`,\nLAG(`Revenue`, 1) OVER (ORDER BY `Month`) AS `Previous Month Revenue`,\nROUND((`Revenue` - LAG(`Revenue`, 1) OVER (ORDER BY `Month`)) * 100.0 / LAG(`Revenue`, 1) OVER (ORDER BY `Month`), 2) AS `Growth Percentage`\nFROM MonthlyRev\nORDER BY `Month`;",
-    #     "topics": ["CTE (Common Table Expression)", "WINDOW FUNCTION", "LAG()", "Arithmetic Operations", "DATE_FORMAT"]
-    # },
-    {
-        "id": 13,
-        "question": "Retrieve the customer IDs who have cancelled rides more than 3 times, along with their average ratings.",
-        "query": "SELECT `Customer ID`, COUNT(*) AS `CancellationsCount`, ROUND(AVG(`Customer Rating`), 2) AS `Avg Customer Rating` FROM uber_rides WHERE `Booking Status` LIKE 'Cancelled%' GROUP BY `Customer ID` HAVING COUNT(*) > 3 ORDER BY `CancellationsCount` DESC LIMIT 10;",
-        "topics": ["GROUP BY", "HAVING", "COUNT", "LIKE operator", "LIMIT"]
-    },
-    {
-        "id": 14,
-        "question": "Find the average ride distance and average booking value for rides completed using each Payment Method.",
-        "query": "SELECT `Payment Method`, COUNT(*) AS `Completed RidesCount`, ROUND(AVG(`Ride Distance`), 2) AS `Avg Ride Distance`, ROUND(AVG(`Booking Value`), 2) AS `Avg Booking Value` FROM uber_rides WHERE `Booking Status` = 'Completed' AND `Payment Method` IS NOT NULL AND `Payment Method` != '' GROUP BY `Payment Method` ORDER BY `Completed RidesCount` DESC;",
-        "topics": ["GROUP BY", "AVG", "WHERE Filters", "ORDER BY"]
-    },
-    {
-        "id": 15,
-        "question": "Find the vehicle types that have a higher average ride distance than the overall average ride distance of all bookings.",
-        "query": "SELECT `Vehicle Type`, ROUND(AVG(`Ride Distance`), 2) AS `Vehicle Avg Distance` FROM uber_rides GROUP BY `Vehicle Type` HAVING AVG(`Ride Distance`) > (SELECT AVG(`Ride Distance`) FROM uber_rides) ORDER BY `Vehicle Avg Distance` DESC;",
-        "topics": ["SUBQUERY", "GROUP BY", "HAVING", "AVG"]
-    }
-]
+
 
 # Helper to serialize cursor results to dict
 def fetch_all_to_dict(cursor):
@@ -335,29 +243,7 @@ def get_metrics():
         cursor.close()
         conn.close()
 
-@app.route('/sql-questions', methods=['GET'])
-def get_sql_questions():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    try:
-        response_questions = []
-        for q in SQL_QUESTIONS:
-            cursor.execute(q["query"])
-            results = fetch_all_to_dict(cursor)
-            response_questions.append({
-                "id": q["id"],
-                "question": q["question"],
-                "query": q["query"],
-                "topics": q["topics"],
-                "results": results
-            })
-        return jsonify(response_questions)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
+
 
 # System prompt outlining database schemas and AI requirements
 SYSTEM_PROMPT = """

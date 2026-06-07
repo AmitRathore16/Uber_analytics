@@ -226,7 +226,7 @@ Insights:
 
 ## 👥 Customer Analytics Dashboard
 
-<img src="cutomer.png" alt="Customer Analytics Dashboard" width="100%">
+<img src="customer.png" alt="Customer Analytics Dashboard" width="100%">
 
 Analyzes:
 

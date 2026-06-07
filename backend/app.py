@@ -43,12 +43,13 @@ load_dotenv()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'database')))
 try:
     # pyrefly: ignore [missing-import]
-    from config import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, DATABASE_NAME
+    from config import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, DATABASE_NAME, DB_PORT
 except ImportError:
     MYSQL_HOST     = os.environ["MYSQL_HOST"]
     MYSQL_USER     = os.environ["MYSQL_USER"]
     MYSQL_PASSWORD = os.environ["MYSQL_PASSWORD"]
     DATABASE_NAME  = os.environ["DATABASE_NAME"]
+    DB_PORT = os.environ["DB_PORT"]
 
 app = Flask(__name__)
 # Allow CORS for dev environment
@@ -68,6 +69,7 @@ def get_db_connection():
         user=MYSQL_USER,
         password=MYSQL_PASSWORD,
         database=DATABASE_NAME,
+        port = int(DB_PORT),
         use_pure=True
     )
 
